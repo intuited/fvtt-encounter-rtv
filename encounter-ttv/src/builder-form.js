@@ -47,7 +47,7 @@ class EncounterBuilderApplication extends Application {
         const options = super.defaultOptions;
         options.title = game.i18n.localize("EB.Title");
         options.id = game.i18n.localize("EB.id");
-        options.template = "modules/encounter-builder/templates/builder-app.html";
+        options.template = "modules/encounter-ttv/templates/builder-app.html";
         options.closeOnSubmit = true;
         options.popOut = true;
         options.width = 510;
