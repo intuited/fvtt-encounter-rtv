@@ -1,0 +1,56 @@
+<form>
+    <div id="EBContainers">
+        <fieldset class="group-container ally-container">
+            <legend class='group-legend'>Allies</legend>
+            <div class="group-field ally-field">
+                {{#each allies}}
+                    <div class='actor-container'>
+                        <img class="actor-portrait" src="{{this.img}}" title="{{this.name}}" id="{{this.id}}"/>
+                        <div class="actor-subtract">
+                            <i class="fas fa-minus" title="{{this.name}}" id="{{this.id}}"></i>
+                        </div>
+                    </div>
+                {{/each}}
+            </div>
+        </fieldset>
+
+        <div class="center-container">
+            <div class="difficulty-rating">
+            </div>
+            <div class="difficulty-threshold">
+                Test value: {{test}}
+            </div>
+            <div class="daily-budget">
+            </div>
+        </div>
+
+        <fieldset class="group-container opponent-container">
+            <legend class='group-legend'>Opponents</legend>
+            <div class="group-field opponent-field">
+                {{#each opponents}}
+                    <div class='actor-container'>
+                        <img class='actor-portrait' src="{{this.img}}" title="{{this.name}}" id="{{this.id}}"/>
+                        <div class="actor-subtract">
+                            <i class="fas fa-minus" title="{{this.name}}" id="{{this.id}}"></i>
+                        </div>
+                    </div>
+                {{/each}}
+            </div>
+        </fieldset>
+    </div>
+
+    <div id="EBXP">
+        <div class='scores'>
+            <h2>
+                Total XP: {{this.totalxp}}
+            </h2>
+
+            <h3>
+                XP / player: {{this.allyxp}}
+            </h3>
+        </div>
+        <button class='clear' type='button'>
+            clear
+        </button>
+    </div>
+</form>

@@ -14,7 +14,7 @@
   ],
   "scripts": [
     "./src/encounter-ttv.js",
-    "./src/builder-form.js"
+    "./src/ttv-form.js"
   ],
   "styles": [
     "./css/encounter-ttv.css"
