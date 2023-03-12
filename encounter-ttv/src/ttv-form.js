@@ -20,12 +20,14 @@ class EncounterTTVApplication extends Application {
             allies: {
                 hp: 0,
                 avg_ac: 0,
+                weighted_ac: 0,
                 dpr: 0,
                 ttv: 0
             },
             opponents: {
                 hp: 0,
                 avg_ac: 0,
+                weighted_ac: 0,
                 dpr: 0,
                 ttv: 0
             }
@@ -106,12 +108,16 @@ class EncounterTTVApplication extends Application {
         let findActorAC = actor => actor.system.attributes.ac.value;
         let findActorHP = actor => actor.system.attributes.hp.value;
 
-        this.calced.allies.hp = sum(this.allies.map(findActorHP))
-        this.calced.opponents.hp = sum(this.opponents.map(findActorHP))
-        let allyACs = this.allies.map(findActorAC)
-        let oppACs = this.opponents.map(findActorAC)
-        this.calced.allies.avg_ac = average(allyACs)
-        this.calced.opponents.avg_ac = average(oppACs)
+        this.calced.allies.hp = sum(this.allies.map(findActorHP));
+        this.calced.opponents.hp = sum(this.opponents.map(findActorHP));
+        let allyACs = this.allies.map(findActorAC);
+        let oppACs = this.opponents.map(findActorAC);
+        this.calced.allies.avg_ac = average(allyACs);
+        this.calced.opponents.avg_ac = average(oppACs);
+
+        let weightedAC = totalHP => (actor => findActorAC(actor) * findActorHP(actor) / totalHP);
+        this.calced.allies.weighted_ac = sum(this.allies.map(weightedAC(this.calced.allies.hp)));
+        this.calced.opponents.weighted_ac = sum(this.opponents.map(weightedAC(this.calced.opponents.hp)));
 
         if (this.selection) {
             this.selection.hp = findActorAC(this.selection.actor);
