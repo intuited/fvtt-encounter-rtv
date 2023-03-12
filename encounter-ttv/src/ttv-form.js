@@ -18,11 +18,13 @@ class EncounterTTVApplication extends Application {
         this.test = "Initial value of test property";
         this.calced = {
             allies: {
+                hp: 0,
                 avg_ac: 0,
                 dpr: 0,
                 ttv: 0
             },
             opponents: {
+                hp: 0,
                 avg_ac: 0,
                 dpr: 0,
                 ttv: 0
@@ -91,16 +93,19 @@ class EncounterTTVApplication extends Application {
      * @memberof EncounterBuilderApplication
      */
     calc() {
-        function findActorAC(actor) {
-            return actor.system.attributes.ac.value;
-        }
+        let sum = (values) => values.reduce((a, b) => a+b, 0);
         function average(values) {
             if (values.length === 0) {
                 return 0;
             }
-            return values.reduce((a, b) => a+b, 0) / values.length;
+            return sum(values) / values.length;
         }
 
+        let findActorAC = actor => actor.system.attributes.ac.value;
+        let findActorHP = actor => actor.system.attributes.hp.value;
+
+        this.calced.allies.hp = sum(this.allies.map(findActorHP))
+        this.calced.opponents.hp = sum(this.opponents.map(findActorHP))
         let allyACs = this.allies.map(findActorAC)
         let oppACs = this.opponents.map(findActorAC)
         this.calced.allies.avg_ac = average(allyACs)
