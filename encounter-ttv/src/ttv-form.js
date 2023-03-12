@@ -16,6 +16,18 @@ class EncounterTTVApplication extends Application {
         this.allies = [];
         this.opponents = [];
         this.test = "Initial value of test property";
+        this.calced = {
+            allies: {
+                avg_ac: 0,
+                dpr: 0,
+                ttv: 0
+            },
+            opponents: {
+                avg_ac: 0,
+                dpr: 0,
+                ttv: 0
+            }
+        }
         game.users.apps.push(this)
     }
 
@@ -36,7 +48,8 @@ class EncounterTTVApplication extends Application {
         return {
             allies: this.allies,
             opponents: this.opponents,
-            test: this.test
+            test: this.test,
+            calced: this.calced
         };
     }
 
@@ -60,11 +73,38 @@ class EncounterTTVApplication extends Application {
     }
 
     /**
+    // totally just pseudocode for now. TODO: rewrite this as JavaScript
+    static findActorAttacks(actor) {
+        for item in actor.items {
+            // actor.items is actually an EmbeddedCollection.  Contains key-value pairs.
+            if (item.hasAttack and item.hasDamage) {
+                // this should work for both NPCs and PCs.
+                yield item;
+            }
+        }
+    }
+    /**/
+
+    /**
      * Performs calculations determine TTV for both sides of the encounter.
      *
      * @memberof EncounterBuilderApplication
      */
     calc() {
+        function findActorAC(actor) {
+            return actor.system.attributes.ac.value;
+        }
+        function average(values) {
+            if (values.length === 0) {
+                return 0;
+            }
+            return values.reduce((a, b) => a+b, 0) / values.length;
+        }
+
+        let allyACs = this.allies.map(findActorAC)
+        let oppACs = this.opponents.map(findActorAC)
+        this.calced.allies.avg_ac = average(allyACs)
+        this.calced.opponents.avg_ac = average(oppACs)
         // TODO
     }
 
