@@ -30,7 +30,7 @@ class EncounterTTVApplication extends Application {
                 ttv: 0
             }
         }
-        this.selected = null;
+        this.selection = null;
         game.users.apps.push(this)
     }
 
@@ -53,7 +53,7 @@ class EncounterTTVApplication extends Application {
             opponents: this.opponents,
             test: this.test,
             calced: this.calced,
-            selected: this.selected
+            selection: this.selection
         };
     }
 
@@ -112,6 +112,11 @@ class EncounterTTVApplication extends Application {
         let oppACs = this.opponents.map(findActorAC)
         this.calced.allies.avg_ac = average(allyACs)
         this.calced.opponents.avg_ac = average(oppACs)
+
+        if (this.selection) {
+            this.selection.hp = findActorAC(this.selection.actor);
+            this.selection.ac = findActorHP(this.selection.actor);
+        }
         // TODO
     }
 
@@ -247,15 +252,20 @@ class EncounterTTVApplication extends Application {
         if ((isPortrait) || (isHoverIcon)) {
             const app = game.users.apps.find(e => e.id === game.i18n.localize("EB.id"));
             let name = event.srcElement.title;
-            let actor;
 
             const parentClass = event.srcElement.parentElement.parentElement.classList.value;
             const parentParentClass = event.srcElement.parentElement.parentElement.parentElement.classList.value;
             if ((parentClass === "group-field ally-field") || (parentParentClass === "group-field ally-field")) {
-                this.selected = this.allies.find(e => e.name === name);
+                this.selection = {
+                    "name": name,
+                    "actor": this.allies.find(e => e.name === name)
+                };
             }
             else if ((parentClass === "group-field opponent-field") || (parentParentClass === "group-field opponent-field")) {
-                this.selected = this.opponents.find(e => e.name === name);
+                this.selection = {
+                    "name": name,
+                    "actor": this.opponents.find(e => e.name === name)
+                };
             }
             app.calc();
             app.render();

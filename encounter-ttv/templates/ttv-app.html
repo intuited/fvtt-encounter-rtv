@@ -47,11 +47,11 @@
 
     <div id="EBXP">
         <div class='scores'>
-            {{#if selected}}
-                {{#with selected}}
+            {{#if selection}}
+                {{#with selection}}
                     <h3>{{name}}</h3>
-                    <em>HP:</em> {{system.attributes.hp.value}}<br>
-                    <em>AC:</em> {{system.attributes.ac.value}}<br>
+                    <em>HP:</em> {{hp}}<br>
+                    <em>AC:</em> {{ac}}<br>
                 {{/with}}
             {{/if}}
         </div>
