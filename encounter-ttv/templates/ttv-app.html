@@ -47,13 +47,13 @@
 
     <div id="EBXP">
         <div class='scores'>
-            <h2>
-                Total XP: {{this.totalxp}}
-            </h2>
-
-            <h3>
-                XP / player: {{this.allyxp}}
-            </h3>
+            {{#if selected}}
+                {{#with selected}}
+                    <h3>{{name}}</h3>
+                    <em>HP:</em> {{system.attributes.hp.value}}<br>
+                    <em>AC:</em> {{system.attributes.ac.value}}<br>
+                {{/with}}
+            {{/if}}
         </div>
         <button class='clear' type='button'>
             clear

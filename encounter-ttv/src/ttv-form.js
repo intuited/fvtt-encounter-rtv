@@ -30,6 +30,7 @@ class EncounterTTVApplication extends Application {
                 ttv: 0
             }
         }
+        this.selected = null;
         game.users.apps.push(this)
     }
 
@@ -51,7 +52,8 @@ class EncounterTTVApplication extends Application {
             allies: this.allies,
             opponents: this.opponents,
             test: this.test,
-            calced: this.calced
+            calced: this.calced,
+            selected: this.selected
         };
     }
 
@@ -245,23 +247,15 @@ class EncounterTTVApplication extends Application {
         if ((isPortrait) || (isHoverIcon)) {
             const app = game.users.apps.find(e => e.id === game.i18n.localize("EB.id"));
             let name = event.srcElement.title;
-            let actorExists;
+            let actor;
 
             const parentClass = event.srcElement.parentElement.parentElement.classList.value;
             const parentParentClass = event.srcElement.parentElement.parentElement.parentElement.classList.value;
             if ((parentClass === "group-field ally-field") || (parentParentClass === "group-field ally-field")) {
-                let actorExists = this.allies.find(e => e.name === name);
-                if (actorExists) {
-                    let ix = this.allies.findIndex(e => e.name === name);
-                    this.allies.splice(ix, 1);
-                }
+                this.selected = this.allies.find(e => e.name === name);
             }
             else if ((parentClass === "group-field opponent-field") || (parentParentClass === "group-field opponent-field")) {
-                let actorExists = this.opponents.find(e => e.name === name);
-                if (actorExists) {
-                    let ix = this.opponents.findIndex(e => e.name === name);
-                    this.opponents.splice(ix, 1);
-                }
+                this.selected = this.opponents.find(e => e.name === name);
             }
             app.calc();
             app.render();
