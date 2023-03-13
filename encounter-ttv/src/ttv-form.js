@@ -108,6 +108,7 @@ class EncounterTTVApplication extends Application {
         let findActorAC = actor => actor.system.attributes.ac.value;
         let findActorHP = actor => actor.system.attributes.hp.value;
 
+        // Total HP and average AC for each side
         this.calced.allies.hp = sum(this.allies.map(findActorHP));
         this.calced.opponents.hp = sum(this.opponents.map(findActorHP));
         let allyACs = this.allies.map(findActorAC);
@@ -115,13 +116,34 @@ class EncounterTTVApplication extends Application {
         this.calced.allies.avg_ac = average(allyACs).toNearest(0.01);
         this.calced.opponents.avg_ac = average(oppACs).toNearest(0.01);
 
+        // Average AC weighted by the HP of each actor
         let weightedAC = totalHP => (actor => findActorAC(actor) * findActorHP(actor) / totalHP);
-        this.calced.allies.weighted_ac = sum(this.allies.map(weightedAC(this.calced.allies.hp))).toNearest(0.01)
-        this.calced.opponents.weighted_ac = sum(this.opponents.map(weightedAC(this.calced.opponents.hp))).toNearest(0.01)
+        this.calced.allies.weighted_ac = sum(this.allies.map(weightedAC(this.calced.allies.hp))).toNearest(0.01);
+        this.calced.opponents.weighted_ac = sum(this.opponents.map(weightedAC(this.calced.opponents.hp))).toNearest(0.01);
+
+        // Average DPR of attacks against the weighted AC of the opposing force
+        let findActorAttacks = actor => actor.items.filter(i => i.hasAttack && i.hasDamage);
+        let numFromToHit = toHit => Number(toHit.replace(' ', '')); // e.g. "+ 5" becomes 5
+        let hitProb = (toHit, AC) => 1 - ( (AC - numFromToHit(toHit) - 1) / 20 );
+        // Calculate average result of a damage roll formula
+        function avgDamage(damageRoll) {
+            // e.g. average value of "2d6+6" is (2*6 + 2)/2
+            let avgDamage = damageRoll.replace(/\b([0-9]+)d([0-9]+)\b/, '($1*$2 + $1)/2');
+            let r = new Roll(avgDamage);  // use Roll.evaluate() as a safe eval
+            return r.evaluate({async: false}).total;
+        }
+        let attackDPR = (attack, targetAC) => hitProb(attack.labels.toHit, targetAC) * avgDamage(attack.labels.damage);
 
         if (this.selection) {
-            this.selection.hp = findActorAC(this.selection.actor);
-            this.selection.ac = findActorHP(this.selection.actor);
+            this.selection.hp = findActorHP(this.selection.actor);
+            this.selection.ac = findActorAC(this.selection.actor);
+            this.selection.attacks = findActorAttacks(this.selection.actor);
+            let opposing = this.selection.squad === this.allies ? this.calced.opponents : this.calced.allies;
+            this.selection.attacks = this.selection.attacks.map(a => ({
+                _attack: a,
+                name: a.name,
+                dpr: attackDPR(a, opposing.weighted_ac)
+            }));
         }
         // TODO
     }
@@ -263,14 +285,16 @@ class EncounterTTVApplication extends Application {
             const parentParentClass = event.srcElement.parentElement.parentElement.parentElement.classList.value;
             if ((parentClass === "group-field ally-field") || (parentParentClass === "group-field ally-field")) {
                 this.selection = {
-                    "name": name,
-                    "actor": this.allies.find(e => e.name === name)
+                    name: name,
+                    actor: this.allies.find(e => e.name === name),
+                    squad: this.allies
                 };
             }
             else if ((parentClass === "group-field opponent-field") || (parentParentClass === "group-field opponent-field")) {
                 this.selection = {
-                    "name": name,
-                    "actor": this.opponents.find(e => e.name === name)
+                    name: name,
+                    actor: this.opponents.find(e => e.name === name),
+                    squad: this.opponents
                 };
             }
             app.calc();
