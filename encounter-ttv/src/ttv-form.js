@@ -112,12 +112,12 @@ class EncounterTTVApplication extends Application {
         this.calced.opponents.hp = sum(this.opponents.map(findActorHP));
         let allyACs = this.allies.map(findActorAC);
         let oppACs = this.opponents.map(findActorAC);
-        this.calced.allies.avg_ac = average(allyACs);
-        this.calced.opponents.avg_ac = average(oppACs);
+        this.calced.allies.avg_ac = average(allyACs).toNearest(0.01);
+        this.calced.opponents.avg_ac = average(oppACs).toNearest(0.01);
 
         let weightedAC = totalHP => (actor => findActorAC(actor) * findActorHP(actor) / totalHP);
-        this.calced.allies.weighted_ac = sum(this.allies.map(weightedAC(this.calced.allies.hp)));
-        this.calced.opponents.weighted_ac = sum(this.opponents.map(weightedAC(this.calced.opponents.hp)));
+        this.calced.allies.weighted_ac = sum(this.allies.map(weightedAC(this.calced.allies.hp))).toNearest(0.01)
+        this.calced.opponents.weighted_ac = sum(this.opponents.map(weightedAC(this.calced.opponents.hp))).toNearest(0.01)
 
         if (this.selection) {
             this.selection.hp = findActorAC(this.selection.actor);
