@@ -98,12 +98,7 @@ class EncounterTTVApplication extends Application {
      */
     calc() {
         let sum = (values) => values.reduce((a, b) => a+b, 0);
-        function average(values) {
-            if (values.length === 0) {
-                return 0;
-            }
-            return sum(values) / values.length;
-        }
+        let average = values => values.length > 0 ? sum(values)/values.length : 0;
 
         let findActorAC = actor => actor.system.attributes.ac.value;
         let findActorHP = actor => actor.system.attributes.hp.value;
