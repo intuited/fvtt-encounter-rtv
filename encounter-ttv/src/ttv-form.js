@@ -142,7 +142,7 @@ class EncounterTTVApplication extends Application {
             this.selection.attacks = this.selection.attacks.map(a => ({
                 _attack: a,
                 name: a.name,
-                dpr: attackDPR(a, opposing.weighted_ac)
+                dpr: attackDPR(a, opposing.weighted_ac).toNearest(0.01)
             }));
         }
         // TODO
