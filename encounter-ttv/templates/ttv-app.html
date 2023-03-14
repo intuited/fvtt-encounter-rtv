@@ -51,10 +51,12 @@
                     <h3>{{name}}</h3>
                     <em>HP:</em> {{hp}}<br>
                     <em>AC:</em> {{ac}}<br>
-                    <h4>Attacks:</h4>
-                    {{#each attacks}}
-                        {{this.name}}: {{this.dpr}} DPR vs weighted AC<br>
-                    {{/each}}
+                    <table>
+                        <th>Attack/Cantrip</th><th>DPR</th>
+                        {{#each attacks}}
+                            <tr><td>{{this.name}}</td><td>{{this.dpr}}</td</tr>
+                        {{/each}}
+                    </table>
                 {{/with}}
             {{/if}}
         </div>
