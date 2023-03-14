@@ -15,21 +15,17 @@
         </fieldset>
 
         <div class="center-container">
-            <div class="difficulty-rating">
-            </div>
             <div class="difficulty-threshold">
                 {{#with calced}}
-                <label>Ally total HP: {{allies.hp}}</label><br>
-                <label>Opponents total HP: {{opponents.hp}}</label><br>
-                <label>Ally average AC: {{allies.avg_ac}}</label><br>
-                <label>Opponents average AC: {{opponents.avg_ac}}</label><br>
-                <label>Ally weighted AC: {{allies.weighted_ac}}</label><br>
-                <label>Opponents weighted AC: {{opponents.weighted_ac}}</label><br>
-                <label>Ally DPR: {{allies.dpr}}</label><br>
-                <label>Opponents DPR: {{opponents.dpr}}</label><br>
+                <table>
+                    <tr><th>Squad</th><th>Allies</th><th>Opponents</th></tr>
+                    <tr><td>Health Pool</td><td>{{allies.hp}}</td><td>{{opponents.hp}}</td></tr>
+                    <tr><td>Average AC</td><td>{{allies.avg_ac}}</td><td>{{opponents.avg_ac}}</td></tr>
+                    <tr><td>Weighted AC</td><td>{{allies.weighted_ac}}</td><td>{{opponents.weighted_ac}}</td></tr>
+                    <tr><td>DPR</td><td>{{allies.dpr}}</td><td>{{opponents.dpr}}</td></tr>
+                    <tr><td><strong>TTV</strong></td><td><strong>{{allies.ttv}}</strong></td><td><strong>{{opponents.ttv}}</strong></td></tr>
+                </table>
                 {{/with}}
-            </div>
-            <div class="daily-budget">
             </div>
         </div>
 
