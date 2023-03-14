@@ -181,6 +181,10 @@ class EncounterTTVApplication extends Application {
         calcSquadDPR(this.calced.allies);
         calcSquadDPR(this.calced.opponents);
 
+        let calcTTV = squad => squad.ttv = (squad.opp.hp / squad.dpr).toNearest(0.01);
+        calcTTV(this.calced.allies);
+        calcTTV(this.calced.opponents);
+
         if (this.selection) {
             this.selection.hp = findActorHP(this.selection.actor);
             this.selection.ac = findActorAC(this.selection.actor);
@@ -192,7 +196,6 @@ class EncounterTTVApplication extends Application {
                 dpr: attackDPR(a, squad.opp.weighted_ac).toNearest(0.01)
             }));
         }
-        // TODO
     }
 
     /**
