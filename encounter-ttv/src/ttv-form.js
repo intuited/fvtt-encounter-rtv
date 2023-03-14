@@ -15,23 +15,28 @@ class EncounterTTVApplication extends Application {
         this.object = Actors
         this.allies = [];
         this.opponents = [];
-        this.test = "Initial value of test property";
         this.calced = {
             allies: {
                 hp: 0,
                 avg_ac: 0,
                 weighted_ac: 0,
                 dpr: 0,
-                ttv: 0
+                ttv: 0,
+                selectedAttacks: new Map(), // maps actor names to attack names or `null`
+                actors: this.allies
             },
             opponents: {
                 hp: 0,
                 avg_ac: 0,
                 weighted_ac: 0,
                 dpr: 0,
-                ttv: 0
+                ttv: 0,
+                selectedAttacks: new Map(),
+                actors: this.opponents
             }
-        }
+        };
+        this.calced.allies.opp = this.calced.opponents;
+        this.calced.opponents.opp = this.calced.allies;
         this.selection = null;
         game.users.apps.push(this)
     }
@@ -97,6 +102,10 @@ class EncounterTTVApplication extends Application {
      * @memberof EncounterBuilderApplication
      */
     calc() {
+        // might be necessary if these arrays get reinstantiated at some point
+        this.calced.allies.actors = this.allies;
+        this.calced.opponents.actors = this.opponents;
+
         let sum = (values) => values.reduce((a, b) => a+b, 0);
         let average = values => values.length > 0 ? sum(values)/values.length : 0;
 
@@ -118,8 +127,8 @@ class EncounterTTVApplication extends Application {
 
         // Average DPR of attacks against the weighted AC of the opposing force
         let findActorAttacks = actor => actor.items.filter(i => i.hasAttack && i.hasDamage);
-        let numFromToHit = toHit => Number(toHit.replace(' ', '')); // e.g. "+ 5" becomes 5
-        let hitProb = (toHit, AC) => 1 - ( (AC - numFromToHit(toHit) - 1) / 20 );
+        let toHitAsNumber = toHit => Number(toHit.replace(' ', '')); // e.g. "+ 5" becomes 5
+        let hitProb = (toHit, AC) => 1 - ( (AC - toHitAsNumber(toHit) - 1) / 20 );
         // Calculate average result of a damage roll formula
         function avgDamage(damageRoll) {
             // e.g. average value of "2d6+6" is (2*6 + 2)/2
@@ -129,15 +138,58 @@ class EncounterTTVApplication extends Application {
         }
         let attackDPR = (attack, targetAC) => hitProb(attack.labels.toHit, targetAC) * avgDamage(attack.labels.damage);
 
+        // select default attacks for any actors that have no selected attack
+        //function selectAttacks(actors, attackMap, oppAC) {
+        function selectAttacks(squad) {
+            let attackMap = squad.selectedAttacks;
+            let oppAC = squad.opp.weighted_ac;
+            squad.actors.forEach(actor => {
+                // if an attack has already been selected for actors with this name
+                let attacks = findActorAttacks(actor);
+                if (attackMap.has(actor.name)) {
+                    // if the selected attack exists, we don't need to change the value
+                    let selectedAttack = attackMap.get(actor.name);
+                    if (attacks.filter(a => a.name === selectedAttack)) {
+                        return;
+                    }
+                }
+                // if the actor has no attacks, we set null
+                if (attacks.length === 0) {
+                    attackMap.set(actor.name, null);
+                    return;
+                }
+                // otherwise we select the attack with the highest DPR as the default
+                let highestDPR = attacks.reduce(
+                    (a1, a2) => attackDPR(a1, oppAC) > attackDPR(a2, oppAC) ? a1 : a2
+                );
+                attackMap.set(actor.name, highestDPR.name);
+            });
+        }
+        selectAttacks(this.calced.allies);
+        selectAttacks(this.calced.opponents);
+
+        function calcSquadDPR(squad) {
+            squad.dpr = sum(squad.actors.map(actor => {
+                let selectedAttackName = squad.selectedAttacks.get(actor.name);
+                if (selectedAttackName === null) {
+                    return 0;
+                }
+                let attack = findActorAttacks(actor).find(a => a.name === selectedAttackName);
+                return attackDPR(attack, squad.opp.weighted_ac);
+            })).toNearest(0.01);
+        }
+        calcSquadDPR(this.calced.allies);
+        calcSquadDPR(this.calced.opponents);
+
         if (this.selection) {
             this.selection.hp = findActorHP(this.selection.actor);
             this.selection.ac = findActorAC(this.selection.actor);
             this.selection.attacks = findActorAttacks(this.selection.actor);
-            let opposing = this.selection.squad === this.allies ? this.calced.opponents : this.calced.allies;
+            let squad = this.selection.squad === this.allies ? this.calced.allies : this.calced.opponents;
             this.selection.attacks = this.selection.attacks.map(a => ({
                 _attack: a,
                 name: a.name,
-                dpr: attackDPR(a, opposing.weighted_ac).toNearest(0.01)
+                dpr: attackDPR(a, squad.opp.weighted_ac).toNearest(0.01)
             }));
         }
         // TODO
