@@ -84,19 +84,6 @@ class EncounterTTVApplication extends Application {
     }
 
     /**
-    // totally just pseudocode for now. TODO: rewrite this as JavaScript
-    static findActorAttacks(actor) {
-        for item in actor.items {
-            // actor.items is actually an EmbeddedCollection.  Contains key-value pairs.
-            if (item.hasAttack and item.hasDamage) {
-                // this should work for both NPCs and PCs.
-                yield item;
-            }
-        }
-    }
-    /**/
-
-    /**
      * Performs calculations determine TTV for both sides of the encounter.
      *
      * @memberof EncounterBuilderApplication
