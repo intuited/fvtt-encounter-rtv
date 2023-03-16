@@ -5,9 +5,13 @@
             <div class="group-field ally-field">
                 {{#each allies}}
                     <div class='actor-container'>
-                        <img class="actor-portrait" src="{{this.img}}" title="{{this.name}}" id="{{this.id}}"/>
+                        {{#ifActorSelected this "allies"}}
+                            <img class="actor-portrait selected" src="{{this.img}}" title="{{this.name}}" id="{{this.id}}"/>
+                        {{else}}
+                            <img class="actor-portrait" src="{{this.img}}" title="{{this.name}}" id="{{this.id}}"/>
+                        {{/ifActorSelected}}
                         <div class="actor-subtract">
-                            <i class="fas fa-minus" title="{{this.name}}" id="{{this.id}}"></i>
+                            <i class="fas fa-border" title="{{this.name}}" id="{{this.id}}"></i>
                         </div>
                     </div>
                 {{/each}}
@@ -34,9 +38,13 @@
             <div class="group-field opponent-field">
                 {{#each opponents}}
                     <div class='actor-container'>
-                        <img class='actor-portrait' src="{{this.img}}" title="{{this.name}}" id="{{this.id}}"/>
+                        {{#ifActorSelected this "opponents"}}
+                            <img class='actor-portrait selected' src="{{this.img}}" title="{{this.name}}" id="{{this.id}}"/>
+                        {{else}}
+                            <img class='actor-portrait' src="{{this.img}}" title="{{this.name}}" id="{{this.id}}"/>
+                        {{/ifActorSelected}}
                         <div class="actor-subtract">
-                            <i class="fas fa-minus" title="{{this.name}}" id="{{this.id}}"></i>
+                            <i class="fas fa-border" title="{{this.name}}" id="{{this.id}}"></i>
                         </div>
                     </div>
                 {{/each}}

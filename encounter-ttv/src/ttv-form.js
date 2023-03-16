@@ -39,6 +39,28 @@ class EncounterTTVApplication extends Application {
         this.calced.opponents.opp = this.calced.allies;
         this.selection = null;
         game.users.apps.push(this)
+        let ttvApp = this;
+        Handlebars.registerHelper("ifActorSelected", (actor, squadName, options) => {
+            /**
+            console.log(`ifActorSelected helper called. actor: ${actor}; squadName: ${squadName}; options: ${options}; this: ${this}`);
+            console.log(actor);
+            console.log(squadName);
+            console.log(options);
+            console.log(this);
+            /**/
+            if (ttvApp.selection !== null) {
+                let squad = squadName === "allies" ? ttvApp.allies : ttvApp.opponents;
+                if (ttvApp.selection.squad === squad && ttvApp.selection.name === actor.name) {
+                    /* Handlebars isn't working as advertised:
+                     * `this` is supposed to be set to the context in the template (I think)
+                     * but that doesn't appear to be happening, so we just hand it `actor` instead,
+                     * since that's the variable that the template passed as `this` when invoking the handler.
+                     */
+                    return options.fn(actor);
+                }
+            }
+            return options.inverse(actor);
+        });
     }
 
     static get defaultOptions() {
