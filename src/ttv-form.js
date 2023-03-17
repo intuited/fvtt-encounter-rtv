@@ -22,7 +22,15 @@ class EncounterTTVApplication extends Application {
                 weighted_ac: 0,
                 dpr: 0,
                 ttv: 0,
-                selectedAttacks: new Map(), // maps actor names to attack names or `null`
+                /* how many of each attack an actor makes (squad-specific)
+                 * { actorName: {
+                 *      attackID: {
+                 *          attack: Item5e
+                 *          count: Number,
+                 *      }
+                 * }}
+                 */
+                attackCounts: new Map(),
                 actors: this.allies
             },
             opponents: {
@@ -31,7 +39,7 @@ class EncounterTTVApplication extends Application {
                 weighted_ac: 0,
                 dpr: 0,
                 ttv: 0,
-                selectedAttacks: new Map(),
+                attackCounts: new Map(),
                 actors: this.opponents
             }
         };
@@ -145,46 +153,80 @@ class EncounterTTVApplication extends Application {
             let r = new Roll(avgDamage);  // use Roll.evaluate() as a safe eval
             return r.evaluate({async: false}).total;
         }
+        /**
         let attackDPR = (attack, targetAC) => hitProb(attack.labels.toHit, targetAC) * avgDamage(attack.labels.damage);
+        /*/
+        let attackDPR = (attack, targetAC) => {
+            console.log(['attackDPR(attack targetAC)', attack, targetAC]);
+            let hp = hitProb(attack.labels.toHit, targetAC);
+            let ad = avgDamage(attack.labels.damage);
+            console.log(['  hitProb result, avgDamage result', hp, ad]);
+            let result = hp * ad;
+            console.log(['  attackDPR result', result]);
+            return result;
+        };
+        /**/
 
-        // select default attacks for any actors that have no selected attack
-        //function selectAttacks(actors, attackMap, oppAC) {
-        function selectAttacks(squad) {
-            let attackMap = squad.selectedAttacks;
+        // set initial attack counts for new actors
+        function setAttackCounts(squad) {
             let oppAC = squad.opp.weighted_ac;
             squad.actors.forEach(actor => {
-                // if an attack has already been selected for actors with this name
-                let attacks = findActorAttacks(actor);
-                if (attackMap.has(actor.name)) {
-                    // if the selected attack exists, we don't need to change the value
-                    let selectedAttack = attackMap.get(actor.name);
-                    if (attacks.filter(a => a.name === selectedAttack)) {
-                        return;
-                    }
-                }
-                // if the actor has no attacks, we set null
-                if (attacks.length === 0) {
-                    attackMap.set(actor.name, null);
+                if (squad.attackCounts.has(actor.name)) {
+                    // if we've already done this, leave things as they are
                     return;
                 }
-                // otherwise we select the attack with the highest DPR as the default
-                let highestDPR = attacks.reduce(
+
+                let actorAttackCounts = new Map();
+                squad.attackCounts.set(actor.name, actorAttackCounts);
+
+                let attacks = findActorAttacks(actor);
+                if (attacks.length === 0) {
+                    // if the actor has no attacks, their entry in squad.attackCounts remains an empty map
+                    return;
+                }
+
+                // Check if the actor has a multiattack which matches a heuristic regex
+                // TODO: add heuristic regex matching for multiattacks
+
+                // otherwise we set the count to 1 for the highest DPR attack and to 0 for others
+                let highestDPRAttack = attacks.reduce(
                     (a1, a2) => attackDPR(a1, oppAC) > attackDPR(a2, oppAC) ? a1 : a2
                 );
-                attackMap.set(actor.name, highestDPR.name);
+                attacks.forEach(attack => actorAttackCounts.set(attack._id, {
+                    attack: attack,
+                    count: attack === highestDPRAttack? 1 : 0
+                }));
             });
         }
-        selectAttacks(this.calced.allies);
-        selectAttacks(this.calced.opponents);
+        setAttackCounts(this.calced.allies);
+        setAttackCounts(this.calced.opponents);
 
         function calcSquadDPR(squad) {
             squad.dpr = sum(squad.actors.map(actor => {
-                let selectedAttackName = squad.selectedAttacks.get(actor.name);
-                if (selectedAttackName === null) {
+                // calculate total DPR of all each actor's attacks
+                let attackCounts = squad.attackCounts.get(actor.name);
+                if (attackCounts === undefined) {
                     return 0;
                 }
-                let attack = findActorAttacks(actor).find(a => a.name === selectedAttackName);
-                return attackDPR(attack, squad.opp.weighted_ac);
+                /**
+                console.log('in calcSquadDPR');
+                console.log(squad);
+                console.log(actor);
+                console.log(attackCounts);
+                let attacks = [...attackCounts.values()];
+                console.log('  attacks', attacks);
+                let dprs = attacks.map(attack =>
+                    attack.count * attackDPR(attack.attack, squad.opp.weighted_ac)
+                );
+                console.log(['dprs', dprs]);
+                let totalDPR = sum(dprs);
+                console.log(['totalDPR', totalDPR]);
+                return totalDPR;
+                /*/
+                return sum([...attackCounts.values()].map(attack =>
+                    attack.count * attackDPR(attack.attack, squad.opp.weighted_ac)
+                ));
+                /**/
             })).toNearest(0.01);
         }
         calcSquadDPR(this.calced.allies);
@@ -337,6 +379,7 @@ class EncounterTTVApplication extends Application {
         const isPortrait = srcClass === "actor-portrait";
         const isHoverIcon = (srcClass === "actor-subtract") || (srcClass === "fas fa-minus");
         if ((isPortrait) || (isHoverIcon)) {
+            console.log('_onClickPortrait(event)', event);
             const app = game.users.apps.find(e => e.id === game.i18n.localize("EB.id"));
             let name = event.srcElement.title;
 
