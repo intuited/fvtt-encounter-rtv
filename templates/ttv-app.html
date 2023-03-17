@@ -54,9 +54,9 @@
                     <em>HP:</em> {{hp}}<br>
                     <em>AC:</em> {{ac}}<br>
                     <table>
-                        <th>Attack/Cantrip</th><th>DPR</th>
+                        <tr><th>#</th><th>Attack/Cantrip</th><th>DPR</th></tr>
                         {{#each attacks}}
-                            <tr><td>{{this.name}}</td><td>{{this.dpr}}</td</tr>
+                        <tr><td><input type="text" class="attack-count" value="{{attackCount this}}" size="2"></td><td>{{this.name}}</td><td>{{this.dpr}}</td</tr>
                         {{/each}}
                     </table>
                 {{/with}}

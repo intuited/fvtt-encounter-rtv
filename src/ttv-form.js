@@ -24,10 +24,10 @@ class EncounterTTVApplication extends Application {
                 ttv: 0,
                 /* how many of each attack an actor makes (squad-specific)
                  * { actorName: {
-                 *      attackID: {
+                 *      attackID: Map(
                  *          attack: Item5e
                  *          count: Number,
-                 *      }
+                 *      )
                  * }}
                  */
                 attackCounts: new Map(),
@@ -47,11 +47,14 @@ class EncounterTTVApplication extends Application {
         this.calced.opponents.opp = this.calced.allies;
         this.selection = null;
         game.users.apps.push(this)
-        let ttvApp = this;
+
+        // value of `this` inside helper functions doesn't seem to agree with
+        // what the documentation says it should be, so we avoid using it
+        let ttv = this;
         Handlebars.registerHelper("ifActorSelected", (actor, squadName, options) => {
-            if (ttvApp.selection !== null) {
-                let squad = squadName === "allies" ? ttvApp.allies : ttvApp.opponents;
-                if (ttvApp.selection.squad === squad && ttvApp.selection.name === actor.name) {
+            if (ttv.selection !== null) {
+                let squad = squadName === "allies" ? ttv.allies : ttv.opponents;
+                if (ttv.selection.squad === squad && ttv.selection.name === actor.name) {
                     /* Handlebars isn't working as advertised:
                      * `this` is supposed to be set to the context in the template (I think)
                      * but that doesn't appear to be happening, so we just hand it `actor` instead,
@@ -61,6 +64,15 @@ class EncounterTTVApplication extends Application {
                 }
             }
             return options.inverse(actor);
+        });
+        Handlebars.registerHelper("attackCount", attack => {
+            // we need the squad in `calced` rather than the one that _onClickPortrait gives us
+            // TODO: refactor things to render this disgusting code unnecessary
+            let squad = ttv.selection.squad === ttv.allies ? ttv.calced.allies : ttv.calced.opponents;
+            let actorName = ttv.selection.name
+            console.log('attackCount helper (attack)', attack);
+            console.log('  squad, actorName', squad, actorName);
+            return squad.attackCounts.get(actorName).get(attack._attack._id).count;
         });
     }
 
