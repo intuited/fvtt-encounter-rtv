@@ -49,13 +49,6 @@ class EncounterTTVApplication extends Application {
         game.users.apps.push(this)
         let ttvApp = this;
         Handlebars.registerHelper("ifActorSelected", (actor, squadName, options) => {
-            /**
-            console.log(`ifActorSelected helper called. actor: ${actor}; squadName: ${squadName}; options: ${options}; this: ${this}`);
-            console.log(actor);
-            console.log(squadName);
-            console.log(options);
-            console.log(this);
-            /**/
             if (ttvApp.selection !== null) {
                 let squad = squadName === "allies" ? ttvApp.allies : ttvApp.opponents;
                 if (ttvApp.selection.squad === squad && ttvApp.selection.name === actor.name) {
@@ -157,12 +150,9 @@ class EncounterTTVApplication extends Application {
         let attackDPR = (attack, targetAC) => hitProb(attack.labels.toHit, targetAC) * avgDamage(attack.labels.damage);
         /*/
         let attackDPR = (attack, targetAC) => {
-            console.log(['attackDPR(attack targetAC)', attack, targetAC]);
             let hp = hitProb(attack.labels.toHit, targetAC);
             let ad = avgDamage(attack.labels.damage);
-            console.log(['  hitProb result, avgDamage result', hp, ad]);
             let result = hp * ad;
-            console.log(['  attackDPR result', result]);
             return result;
         };
         /**/
@@ -208,25 +198,9 @@ class EncounterTTVApplication extends Application {
                 if (attackCounts === undefined) {
                     return 0;
                 }
-                /**
-                console.log('in calcSquadDPR');
-                console.log(squad);
-                console.log(actor);
-                console.log(attackCounts);
-                let attacks = [...attackCounts.values()];
-                console.log('  attacks', attacks);
-                let dprs = attacks.map(attack =>
-                    attack.count * attackDPR(attack.attack, squad.opp.weighted_ac)
-                );
-                console.log(['dprs', dprs]);
-                let totalDPR = sum(dprs);
-                console.log(['totalDPR', totalDPR]);
-                return totalDPR;
-                /*/
                 return sum(Array.from(attackCounts.values(), attack =>
                     attack.count * attackDPR(attack.attack, squad.opp.weighted_ac)
                 ));
-                /**/
             })).toNearest(0.01);
         }
         calcSquadDPR(this.calced.allies);
@@ -379,7 +353,6 @@ class EncounterTTVApplication extends Application {
         const isPortrait = srcClass === "actor-portrait";
         const isHoverIcon = (srcClass === "actor-subtract") || (srcClass === "fas fa-minus");
         if ((isPortrait) || (isHoverIcon)) {
-            console.log('_onClickPortrait(event)', event);
             const app = game.users.apps.find(e => e.id === game.i18n.localize("EB.id"));
             let name = event.srcElement.title;
 
