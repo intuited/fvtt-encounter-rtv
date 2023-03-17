@@ -223,7 +223,7 @@ class EncounterTTVApplication extends Application {
                 console.log(['totalDPR', totalDPR]);
                 return totalDPR;
                 /*/
-                return sum([...attackCounts.values()].map(attack =>
+                return sum(Array.from(attackCounts.values(), attack =>
                     attack.count * attackDPR(attack.attack, squad.opp.weighted_ac)
                 ));
                 /**/
