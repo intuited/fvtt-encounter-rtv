@@ -100,6 +100,7 @@ class EncounterTTVApplication extends Application {
     }
 
     activateListeners(html) {
+        console.log('activateListeners(html)', html);
         super.activateListeners(html);
         html.find("#EBContainers .actor-container").each((i, li) => {
             li.setAttribute("draggable", true);
@@ -113,6 +114,10 @@ class EncounterTTVApplication extends Application {
         html.find("#EBContainers .ally-container")[0].addEventListener("drop", this._onDropAlly.bind(this));
         html.find("#EBContainers .opponent-container")[0].addEventListener("drop", this._onDropOpponent.bind(this));
         html.find("#EBXP .clear")[0].addEventListener("click", this._onClickButton);
+        let attackCountInputs = html.find("#EBXP .attack-count");
+        for (let el of attackCountInputs) {
+            el.addEventListener("change", this._onChangeAttackCount.bind(this));
+        }
         html[0].render = this.render;
         html[0].ondragover = this._onDragOver;
         html[0].ondrop = this._onDrop;
@@ -405,4 +410,21 @@ class EncounterTTVApplication extends Application {
         app.render();
     }
 
+    /**
+     * Reacts to changes to an attack count input box.
+     * Sets the attack count for the appropriate attack under this.calced and redraws.
+     * @param {*} event
+     * @memberof EncounterBuilderApplication
+     */
+    _onChangeAttackCount(event) {
+        event.stopPropagation();
+        console.log('_onChangeAttackCount(event)', event);
+        let calcedSquad = this.selection.squad === this.allies ? this.calced.allies : this.calced.opponents;
+        let actorAttackCounts = calcedSquad.attackCounts.get(this.selection.name);
+        let attack = actorAttackCounts.get(event.srcElement.id);
+        attack.count = event.srcElement.value;
+
+        this.calc();
+        this.render();
+    }
 }

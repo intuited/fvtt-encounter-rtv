@@ -56,7 +56,9 @@
                     <table>
                         <tr><th>#</th><th>Attack/Cantrip</th><th>DPR</th></tr>
                         {{#each attacks}}
-                        <tr><td><input type="text" class="attack-count" value="{{attackCount this}}" size="2"></td><td>{{this.name}}</td><td>{{this.dpr}}</td</tr>
+                        <tr><td><input type="text" class="attack-count" value="{{attackCount this}}"
+                                       size="2" id="{{this._attack._id}}"></td>
+                            <td>{{this.name}}</td><td>{{this.dpr}}</td</tr>
                         {{/each}}
                     </table>
                 {{/with}}
