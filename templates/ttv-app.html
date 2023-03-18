@@ -61,6 +61,10 @@
                             <td>{{this.name}}</td><td>{{this.dpr}}</td</tr>
                         {{/each}}
                     </table>
+                    {{#ifSelectionHasMultiattack}}
+                        <h4>Multiattack</h4>
+                        {{selectionMultiattack}}
+                    {{/ifSelectionHasMultiattack}}
                 {{/with}}
             {{/if}}
         </div>

@@ -74,6 +74,15 @@ class EncounterTTVApplication extends Application {
             console.log('  squad, actorName', squad, actorName);
             return squad.attackCounts.get(actorName).get(attack._attack._id).count;
         });
+        Handlebars.registerHelper("ifSelectionHasMultiattack", (options) => {
+            if (ttv.selectedActorMultiattack) {
+                return options.fn();
+            }
+        });
+        Handlebars.registerHelper("selectionMultiattack", () => {
+            console.log('selectionMultiattack', this);
+            return ttv.selectedActorMultiattack.system.description.value;
+        });
     }
 
     static get defaultOptions() {
@@ -237,6 +246,14 @@ class EncounterTTVApplication extends Application {
                 name: a.name,
                 dpr: attackDPR(a, squad.opp.weighted_ac).toNearest(0.01)
             }));
+        }
+    }
+
+    get selectedActorMultiattack() {
+        if (this.selection) {
+            let ret = this.selection.actor.items.find(i => i.name === 'Multiattack');
+            console.log('selectedActorMultiattack', ret);
+            return ret;
         }
     }
 
