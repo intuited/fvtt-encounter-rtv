@@ -75,13 +75,10 @@ class EncounterTTVApplication extends Application {
             return squad.attackCounts.get(actorName).get(attack._attack._id).count;
         });
         Handlebars.registerHelper("ifSelectionHasMultiattack", (options) => {
-            if (ttv.selectedActorMultiattack) {
-                return options.fn();
+            let ma;
+            if (ma = ttv.selectedActorMultiattack) {
+                return options.fn(ma);
             }
-        });
-        Handlebars.registerHelper("selectionMultiattack", () => {
-            console.log('selectionMultiattack', this);
-            return ttv.selectedActorMultiattack.system.description.value;
         });
     }
 
@@ -249,11 +246,26 @@ class EncounterTTVApplication extends Application {
         }
     }
 
+    /**
+     * Returns the best multiattack item in the inventory of the selected actor.
+     * For NPCs, this is their Multiattack feature.
+     * For PCs, this is Master of Combat, Greater Extra Attack, or Extra Attack,
+     * in descending order of preference.
+     */
     get selectedActorMultiattack() {
         if (this.selection) {
-            let ret = this.selection.actor.items.find(i => i.name === 'Multiattack');
-            console.log('selectedActorMultiattack', ret);
-            return ret;
+            let npcMA = this.selection.actor.items.find(i => i.name === 'Multiattack');
+            if (npcMA) {
+                console.log('<<selectedActorMultiattack: npcMA', npcMA);
+                return npcMA;
+            }
+            for (let s of ['Master of Combat', 'Greater Extra Attack', 'Extra Attack']) {
+                let pcMA = this.selection.actor.items.find(i => i.name === s);
+                if (pcMA) {
+                    console.log('<<selectedActorMultiattack: pcMA', pcMA);
+                    return pcMA;
+                }
+            }
         }
     }
 
