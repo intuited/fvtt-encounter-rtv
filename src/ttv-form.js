@@ -169,14 +169,34 @@ class EncounterTTVApplication extends Application {
             let r = new Roll(avgDamage);  // use Roll.evaluate() as a safe eval
             return r.evaluate({async: false}).total;
         }
+
+        /**
+         * TODO: make this a set of methods in different classes (5e, sw5e, ...)
+         */
+        function attackUsesResources(attack) {
+            let mode = attack.system?.scaling?.mode
+            // 5e uses "cantrip" here; sw5e uses "atwill"
+            return mode === 'atwill' || mode === 'cantrip';
+        }
+        /**
+         * TODO: make this a set of methods in different classes (5e, sw5e, ...)
+         */
+        function attackCasterLevel(attack) {
+            let ret = attack.curAdvancementCharLevel; // sw5e
+            if (ret === undefined) {
+                ret = attack.parent.system.details.level; // 5e
+            }
+            return ret;
+        }
+
         /**
          * Pulls the damage formula out of the attack
          * and adjusts it for cantrip scaling when appropriate.
          */
         function getDamageFormula(attack) {
             let damageFormula = attack.labels.damage;
-            if (attack.system?.scaling?.mode == 'atwill') {
-                let casterLevel = attack.curAdvancementCharLevel;
+            if (attackUsesResources(attack)) {
+                let casterLevel = attackCasterLevel(attack);
                 const cantripTiers = [
                     {pred: l => l >= 17, dice: 4},
                     {pred: l => l >= 11, dice: 3},
