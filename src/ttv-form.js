@@ -45,6 +45,19 @@ class EncounterTTVApplication extends Application {
         };
         this.calced.allies.opp = this.calced.opponents;
         this.calced.opponents.opp = this.calced.allies;
+        /**
+         * Tracks which actor is selected (all instances of the selected actor are selected)
+         * { actor:   [references the corresponding actor object in this.allies or this.opponents]
+         *   name:    String
+         *   squad:   [references either this.allies or this.opponents]
+         *   ac:      Number
+         *   hp:      Number
+         *   attacks: Array of Item5e objects
+         * }
+         * TODO: name, ac, hp, and attacks should probably move into a `calced` object under selection
+         *       They're used when rendering the selection div but aren't directly controlled
+         *       Or maybe they should be located in like this.calced.selection
+         */
         this.selection = null;
         game.users.apps.push(this)
 
@@ -119,7 +132,7 @@ class EncounterTTVApplication extends Application {
         })
         html.find("#EBContainers .ally-container")[0].addEventListener("drop", this._onDropAlly.bind(this));
         html.find("#EBContainers .opponent-container")[0].addEventListener("drop", this._onDropOpponent.bind(this));
-        html.find("#EBXP .clear")[0].addEventListener("click", this._onClickButton);
+        html.find("#EBXP .remove-actor")[0].addEventListener("click", this._onClickRemove.bind(this));
         let attackCountInputs = html.find("#EBXP .attack-count");
         for (let el of attackCountInputs) {
             el.addEventListener("change", this._onChangeAttackCount.bind(this));
@@ -468,19 +481,19 @@ class EncounterTTVApplication extends Application {
     }
 
     /**
-     * Clears list of allies and opponents.
+     * Removes one instance of the selected actor.
      *
      * @param {*} event
      * @memberof EncounterBuilderApplication
      */
-    _onClickButton(event) {
+    _onClickRemove(event) {
         event.stopPropagation();
-        const app = game.users.apps.find(e => e.id === game.i18n.localize("EB.id"));
-        app.allies = [];
-        app.opponents = [];
+        let actorID = this.selection.actor.id
+        let actorIndex = this.selection.squad.findIndex(a => a.id === actorID);
+        this.selection.squad.splice(actorIndex, 1);
 
-        app.calc();
-        app.render();
+        this.calc();
+        this.render();
     }
 
     /**
