@@ -1,8 +1,8 @@
 {
-  "id": "encounter-ttv",
-  "title": "Encounter TTV",
-  "description": "Calculates Time To Victory for both sides of an encounter based on simulated actions.",
-  "version": "0.0.1",
+  "id": "encounter-rtv",
+  "title": "Encounter RTV",
+  "description": "Calculates Rounds To Victory for both sides of an encounter based on simulated actions.",
+  "version": "0.1.0",
   "compatibility": {
     "minimum": "10",
     "verified": "10.291"
@@ -13,11 +13,11 @@
     }
   ],
   "scripts": [
-    "./src/encounter-ttv.js",
-    "./src/ttv-form.js"
+    "./src/encounter-rtv.js",
+    "./src/rtv-form.js"
   ],
   "styles": [
-    "./css/encounter-ttv.css"
+    "./css/encounter-rtv.css"
   ],
   "languages": [
     {
@@ -36,8 +36,8 @@
       "path": "lang/es-ES.json"
     }
   ],
-  "url": "https://github.com/intuited/fvtt-encounter-ttv",
-  "manifest": "https://raw.githubusercontent.com/intuited/fvtt-encounter-ttv/master/encounter-ttv/module.json",
-  "download": "https://github.com/intuited/fvtt-encounter-ttv/archive/v0.0.1.zip",
-  "readme": "https://github.com/intuited/fvtt-encounter-ttv/blob/master/README.md"
+  "url": "https://github.com/intuited/fvtt-encounter-rtv",
+  "manifest": "https://raw.githubusercontent.com/intuited/fvtt-encounter-rtv/master/encounter-rtv/module.json",
+  "download": "https://github.com/intuited/fvtt-encounter-rtv/archive/v0.0.1.zip",
+  "readme": "https://github.com/intuited/fvtt-encounter-rtv/blob/master/README.md"
 }

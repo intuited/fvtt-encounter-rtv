@@ -6,7 +6,7 @@ Handlebars.registerHelper("capitalizeAll", function (str) {
     return str.toUpperCase();
 });
 
-class EncounterTTVApplication extends Application {
+class EncounterRTVApplication extends Application {
     constructor(Actors, options = {}) {
         super(options);
 
@@ -21,7 +21,7 @@ class EncounterTTVApplication extends Application {
                 avg_ac: 0,
                 weighted_ac: 0,
                 dpr: 0,
-                ttv: 0,
+                rtv: 0,
                 /* how many of each attack an actor makes (squad-specific)
                  * { actorName: {
                  *      attackID: Map(
@@ -38,7 +38,7 @@ class EncounterTTVApplication extends Application {
                 avg_ac: 0,
                 weighted_ac: 0,
                 dpr: 0,
-                ttv: 0,
+                rtv: 0,
                 attackCounts: new Map(),
                 actors: this.opponents
             }
@@ -63,11 +63,11 @@ class EncounterTTVApplication extends Application {
 
         // value of `this` inside helper functions doesn't seem to agree with
         // what the documentation says it should be, so we avoid using it
-        let ttv = this;
+        let rtv = this;
         Handlebars.registerHelper("ifActorSelected", (actor, squadName, options) => {
-            if (ttv.selection !== null) {
-                let squad = squadName === "allies" ? ttv.allies : ttv.opponents;
-                if (ttv.selection.squad === squad && ttv.selection.name === actor.name) {
+            if (rtv.selection !== null) {
+                let squad = squadName === "allies" ? rtv.allies : rtv.opponents;
+                if (rtv.selection.squad === squad && rtv.selection.name === actor.name) {
                     /* Handlebars isn't working as advertised:
                      * `this` is supposed to be set to the context in the template (I think)
                      * but that doesn't appear to be happening, so we just hand it `actor` instead,
@@ -81,15 +81,15 @@ class EncounterTTVApplication extends Application {
         Handlebars.registerHelper("attackCount", attack => {
             // we need the squad in `calced` rather than the one that _onClickPortrait gives us
             // TODO: refactor things to render this disgusting code unnecessary
-            let squad = ttv.selection.squad === ttv.allies ? ttv.calced.allies : ttv.calced.opponents;
-            let actorName = ttv.selection.name
+            let squad = rtv.selection.squad === rtv.allies ? rtv.calced.allies : rtv.calced.opponents;
+            let actorName = rtv.selection.name
             console.log('attackCount helper (attack)', attack);
             console.log('  squad, actorName', squad, actorName);
             return squad.attackCounts.get(actorName).get(attack._attack._id).count;
         });
         Handlebars.registerHelper("ifSelectionHasMultiattack", (options) => {
             let ma;
-            if (ma = ttv.selectedActorMultiattack) {
+            if (ma = rtv.selectedActorMultiattack) {
                 return options.fn(ma);
             }
         });
@@ -99,12 +99,12 @@ class EncounterTTVApplication extends Application {
         const options = super.defaultOptions;
         options.title = game.i18n.localize("EB.Title");
         options.id = game.i18n.localize("EB.id");
-        options.template = "modules/encounter-ttv/templates/ttv-app.html";
+        options.template = "modules/encounter-rtv/templates/rtv-app.html";
         options.closeOnSubmit = true;
         options.popOut = true;
         options.width = 510;
         options.height = "auto";
-        options.classes = ["encounter-ttv", "ttv-form"];
+        options.classes = ["encounter-rtv", "rtv-form"];
         return options;
     }
 
@@ -143,7 +143,7 @@ class EncounterTTVApplication extends Application {
     }
 
     /**
-     * Performs calculations determine TTV for both sides of the encounter.
+     * Performs calculations determine RTV for both sides of the encounter.
      *
      * @memberof EncounterBuilderApplication
      */
@@ -286,9 +286,9 @@ class EncounterTTVApplication extends Application {
         calcSquadDPR(this.calced.allies);
         calcSquadDPR(this.calced.opponents);
 
-        let calcTTV = squad => squad.ttv = (squad.opp.hp / squad.dpr).toNearest(0.01);
-        calcTTV(this.calced.allies);
-        calcTTV(this.calced.opponents);
+        let calcRTV = squad => squad.rtv = (squad.opp.hp / squad.dpr).toNearest(0.01);
+        calcRTV(this.calced.allies);
+        calcRTV(this.calced.opponents);
 
         if (this.selection) {
             this.selection.hp = findActorHP(this.selection.actor);
