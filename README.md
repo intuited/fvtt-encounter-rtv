@@ -1,78 +1,47 @@
-## 5E Encounter Builder
+## 5E Encounter RTV
 
-* **Author**: RaySSharma#4736
-* **Version**: 0.4.0
-* **Foundry VTT Compatibility**: 10+
-* **System Compatibility (If applicable)**: D&D5E
-* **Translation Support**: en
-
-### Link(s) to Module
-
-* [https://github.com/RaySSharma/foundry-modules/tree/master/encounter-builder](https://github.com/RaySSharma/foundry-modules/tree/master/encounter-builder)
-* [https://raw.githubusercontent.com/RaySSharma/foundry-modules/master/encounter-builder/encounter-builder/module.json](https://raw.githubusercontent.com/RaySSharma/foundry-modules/master/encounter-builder/encounter-builder/module.json)
+**Version**: 0.1.0
+**Author**: [Ted Tibbetts][tt]
+**Source Repository**: [github][gh]
 
 ### Description
+Encounter RTV is a simulation-based encounter balancing module.  Drag-drop in actors,
+and it will calculate average Damage Per Round and Rounds To Victory for both squads.
+The idea is not to entirely predict which side will win,
+but to give the GM a baseline estimate of what will happen if no limited resources are used.
 
-This module adds an Application to aid in building D&D5E combat encounters. Following a similar design to [Kobold Fight Club](https://kobold.club/fight/#/encounter-builder), this module calculates encounter difficulty for your chosen PCs and monsters/NPCs. Encounter prep has never been easier!
+### Compatibility
+* Foundry: Tested on v. 10.291
+* D&D 5e:  Tested with system version 2.1.5
+* sw5e:    Tested with system version 2.0.3.2.3.8
 
-* Calculates combat difficulty based on XP thresholds (DMG) for players
-* Includes difficulty multipliers for fights against many opponents
-* Adjusts difficulty for parties of <3 players, or >5 players.
-* Calculates total XP and XP per player.
-* Drag-and-drop from compendiums or existing actors.
-* Drag-and-drop from builder to canvas.
-* *Approximates* encounter difficulty for friendly monsters or hostile players
-  * Hostile player XP set by comparing level to the deadly XP threshold table.
-  * Allied monster levels set by comparing XP to the deadly XP threshold table.
+### Functionality
+- Actors can be dragged in to either squad from the Actors tab, from compendiums, or from other sources like [Quick Insert][qi].
+- It's also possible to drag in a folder of actors.
+- For each squad, the weighted AC is calculated.  This is sum of the ACs of each squad member multiplied by the member's proportion of the total squad HP.
+- Encounter RTV will use each actor's attack or cantrip with the highest DPR against enemy weighted AC.
+- Attack counts are common to all instances of a given actor for that squad. E.G. if you add 3 Scouts to the Opponents squad and give them 2 Longbow attacks, all 3 will use that attack count.
+- Currently, weapon attacks and attack cantrips ("at-will powers" in sw5e) are considered for autoselection.  Leveled attack spells are listed but are always given an attack count of 0.
+- Multiattack features are displayed, but do not currently affect attack counts.
+- The **Remove** button will remove one instance of the selected actor from that squad.  E.G. if you have 3 Scouts and 1 Bandit in a squad, selecting a Scout and clicking Remove will remove 1 Scout.
+- Actors can also be dragged from the RTV window to the canvas.
 
-![Encounter](./images/testencounter.png "Encounter Building")
-![Encounter2](./images/testencounter.gif "Encounter Building 2")
+### Credit
+The UI code was largely lifted from [Encounter Builder for 5e][eb5e].
+If you're interested in a CR-based approach to encounter balancing, check out that module!
 
 ### Installation
 
-#### Method 1
+Use the green Code dropdown in [github][gh] to choose your preferred download method.
+Place the code in your `foundrydata` directory at `Data/modules/encounter-rtv`.
 
-* Download the .zip file in this repository.
-* Extract the contents of the zip to your dataPath, `/Data/modules/`
-* Restart Foundry.
+### Upcoming features
+These features will be added in an upcoming release.
+- Inclusion of save-based cantrips in DPR calculations
+- Multiattack heuristics to set attack counts properly for PC and some NPCs
+- Ability to modify to-hit and damage formulae for individual attacks
 
-#### Method 2
-
-* Start up Foundry and click "Install Module" in the "Add-On Modules" tab.
-* Paste the link: `https://raw.githubusercontent.com/RaySSharma/foundry-modules/master/encounter-builder/encounter-builder/module.json`
-* Click "Install" and it should appear in your modules list.
-
-### Updates
-
-#### 0.0.1
-
-* Created the Encounter Builder Application.
-
-#### 0.0.2
-
-* Fixed call to the Application parent class (thanks @tposney#1462).
-
-#### 0.1.0
-
-* Added drag-and-drop for actors from builder to canvas.
-* Added drag-and-drop for actors in compendiums to builder.
-* Changed to click-to-remove for actors in builder.
-* Added on-hover image for actors in builder.
-* Added Chrome support (event.explicitOriginalTarget -> event.srcElement).
-
-#### 0.2.0
-
-* Added support for hostile (opponent) players or friendly (allied) monsters.
-* Player characters can only be placed once. Monsters can be placed multiple times.
-* Added box highlighting when dragging opponents.
-* Refactored HTML and CSS.
-* Added button to clear builder.
-
-#### 0.3.0
-
-* Updated for Foundry VTT V9+ (thanks @dmizrahi)
-
-#### 0.4.1
-
-* Updated for Foundry VTT V10 (thanks stian-svedenborg)
-* Fixed bugs with drag-to-canvas
+[tt]: https://github.com/intuited
+[qi]: https://foundryvtt.com/packages/quick-insert
+[eb5e]: https://foundryvtt.com/packages/encounter-builder-5e/
+[gh]: https://github.com/intuited/fvtt-encounter-rtv
