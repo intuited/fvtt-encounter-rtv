@@ -1,7 +1,7 @@
 {
-  "EB.Title": "5E Encounter Builder",
-  "EB.Description": "Adds an application to determine encounter difficulty, based on the Kobold Fight Club.",
-  "EB.id": "encounter-builder",
+  "EB.Title": "5E Encounter RTV",
+  "EB.Description": "Simulation-based encounter balancing module.",
+  "EB.id": "encounter-ttv",
   "EB.Submit": "Submit",
-  "EB.EntityError": "EncounterBuilder | App only accept Actors"
+  "EB.EntityError": "EncounterRTV | Drag-drop only accepts Actors"
 }
