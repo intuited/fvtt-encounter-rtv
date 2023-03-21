@@ -170,11 +170,35 @@ class EncounterTTVApplication extends Application {
             return r.evaluate({async: false}).total;
         }
         /**
-        let attackDPR = (attack, targetAC) => hitProb(attack.labels.toHit, targetAC) * avgDamage(attack.labels.damage);
-        /*/
+         * Pulls the damage formula out of the attack
+         * and adjusts it for cantrip scaling when appropriate.
+         */
+        function getDamageFormula(attack) {
+            let damageFormula = attack.labels.damage;
+            if (attack.system?.scaling?.mode == 'atwill') {
+                let casterLevel = attack.curAdvancementCharLevel;
+                const cantripTiers = [
+                    {pred: l => l >= 17, dice: 4},
+                    {pred: l => l >= 11, dice: 3},
+                    {pred: l => l >=  5, dice: 2},
+                    {pred: l =>    true, dice: 1}
+                ];
+                for (let tier of cantripTiers) {
+                    if (tier.pred(casterLevel)) {
+                        let ret = damageFormula.replace( /\b1d([0-9]+)\b/, `${tier.dice}d$1`);
+                        console.log('getDamageFormula(attack): damageFormula, casterLevel, ret',
+                            attack, damageFormula, casterLevel, ret
+                        );
+                        return ret;
+                    }
+                }
+            }
+            return damageFormula;
+        }
         let attackDPR = (attack, targetAC) => {
             let hp = hitProb(attack.labels.toHit, targetAC);
-            let ad = avgDamage(attack.labels.damage);
+            let damageFormula = getDamageFormula(attack);
+            let ad = avgDamage(damageFormula);
             let result = hp * ad;
             return result;
         };
