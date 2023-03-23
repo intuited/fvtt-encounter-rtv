@@ -24,16 +24,6 @@
       "lang": "en",
       "name": "English",
       "path": "lang/en.json"
-    },
-    {
-      "lang": "pt",
-      "name": "Português do Brasil",
-      "path": "lang/pt-BR.json"
-    },
-    {
-      "lang": "es",
-      "name": "Castellano",
-      "path": "lang/es-ES.json"
     }
   ],
   "url": "https://github.com/intuited/fvtt-encounter-rtv",
