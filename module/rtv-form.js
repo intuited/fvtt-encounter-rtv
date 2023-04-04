@@ -6,7 +6,7 @@ Handlebars.registerHelper("capitalizeAll", function (str) {
     return str.toUpperCase();
 });
 
-class EncounterRTVApplication extends Application {
+export default class EncounterRTVApplication extends Application {
     constructor(Actors, options = {}) {
         super(options);
 

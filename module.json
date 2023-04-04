@@ -2,7 +2,7 @@
   "id": "encounter-rtv",
   "title": "Encounter RTV",
   "description": "Calculates Rounds To Victory for both sides of an encounter based on simulated actions.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "compatibility": {
     "minimum": "10",
     "verified": "10.291"
@@ -12,9 +12,8 @@
       "name": "intuited"
     }
   ],
-  "scripts": [
-    "./src/encounter-rtv.js",
-    "./src/rtv-form.js"
+  "esmodules": [
+    "module/encounter-rtv.js"
   ],
   "styles": [
     "./css/encounter-rtv.css"
