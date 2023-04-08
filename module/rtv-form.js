@@ -60,8 +60,8 @@ export default class EncounterRTVApplication extends Application {
             // TODO: refactor things to render this disgusting code unnecessary
             let squad = rtv.selection.squad === rtv.allies ? rtv.calced.allies : rtv.calced.opponents;
             let actorName = rtv.selection.name
-            console.log('attackCount helper (attack)', attack);
-            console.log('  squad, actorName', squad, actorName);
+            log('attackCount helper (attack)', attack);
+            log('  squad, actorName', squad, actorName);
             return squad.attackCounts.get(actorName).get(attack._attack._id).count;
         });
         Handlebars.registerHelper("ifSelectionHasMultiattack", (options) => {
@@ -300,7 +300,7 @@ export default class EncounterRTVApplication extends Application {
      */
     _onChangeAttackCount(event) {
         event.stopPropagation();
-        console.log('_onChangeAttackCount(event)', event);
+        log('_onChangeAttackCount(event)', event);
         let actorAttackCounts = this.selection.getActorAttackCounts(this.selection.actor);
         let attack = actorAttackCounts.get(event.srcElement.id);
         attack.count = event.srcElement.value;

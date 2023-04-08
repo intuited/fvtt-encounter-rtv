@@ -2,8 +2,6 @@ const MODULE_ID = 'encounter-rtv';
 import EncounterRTVApplication from './rtv-form.js';
 import log from './log.js';
 
-console.log('================================================\nglobalThis during module load:', Object.assign({}, globalThis));
-
 function getSceneControlButtons(buttons) {
     log('getSceneControlButtons; buttons:', buttons);
     let tokenButton = buttons.find(b => b.name === "token");
