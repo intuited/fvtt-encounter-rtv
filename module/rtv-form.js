@@ -1,9 +1,15 @@
+import log from './log.js';
+import CalcRTV from "./calc.js";
+
 let EB = {};
 EB.borderStyle = "2px solid rgb(120, 46, 34)";
 EB.highlightStyle = "";
 
 Handlebars.registerHelper("capitalizeAll", function (str) {
     return str.toUpperCase();
+});
+Handlebars.registerHelper('roundTo100ths', function(val) {
+    return val.toNearest(0.01);
 });
 
 export default class EncounterRTVApplication extends Application {
@@ -15,36 +21,7 @@ export default class EncounterRTVApplication extends Application {
         this.object = Actors
         this.allies = [];
         this.opponents = [];
-        this.calced = {
-            allies: {
-                hp: 0,
-                avg_ac: 0,
-                weighted_ac: 0,
-                dpr: 0,
-                rtv: 0,
-                /* how many of each attack an actor makes (squad-specific)
-                 * { actorName: {
-                 *      attackID: Map(
-                 *          attack: Item5e
-                 *          count: Number,
-                 *      )
-                 * }}
-                 */
-                attackCounts: new Map(),
-                actors: this.allies
-            },
-            opponents: {
-                hp: 0,
-                avg_ac: 0,
-                weighted_ac: 0,
-                dpr: 0,
-                rtv: 0,
-                attackCounts: new Map(),
-                actors: this.opponents
-            }
-        };
-        this.calced.allies.opp = this.calced.opponents;
-        this.calced.opponents.opp = this.calced.allies;
+        this.calced = new CalcRTV(this.allies, this.opponents);
         /**
          * Tracks which actor is selected (all instances of the selected actor are selected)
          * { actor:   [references the corresponding actor object in this.allies or this.opponents]
@@ -89,7 +66,7 @@ export default class EncounterRTVApplication extends Application {
         });
         Handlebars.registerHelper("ifSelectionHasMultiattack", (options) => {
             let ma;
-            if (ma = rtv.selectedActorMultiattack) {
+            if (ma = rtv.selection?.multiattack) {
                 return options.fn(ma);
             }
         });
@@ -119,7 +96,7 @@ export default class EncounterRTVApplication extends Application {
     }
 
     activateListeners(html) {
-        console.log('activateListeners(html)', html);
+        log('activateListeners(html)', html);
         super.activateListeners(html);
         html.find("#EBContainers .actor-container").each((i, li) => {
             li.setAttribute("draggable", true);
@@ -151,179 +128,6 @@ export default class EncounterRTVApplication extends Application {
         // might be necessary if these arrays get reinstantiated at some point
         this.calced.allies.actors = this.allies;
         this.calced.opponents.actors = this.opponents;
-
-        let sum = (values) => values.reduce((a, b) => a+b, 0);
-        let average = values => values.length > 0 ? sum(values)/values.length : 0;
-
-        let findActorAC = actor => actor.system.attributes.ac.value;
-        let findActorHP = actor => actor.system.attributes.hp.value;
-
-        // Total HP and average AC for each side
-        this.calced.allies.hp = sum(this.allies.map(findActorHP));
-        this.calced.opponents.hp = sum(this.opponents.map(findActorHP));
-        let allyACs = this.allies.map(findActorAC);
-        let oppACs = this.opponents.map(findActorAC);
-        this.calced.allies.avg_ac = average(allyACs).toNearest(0.01);
-        this.calced.opponents.avg_ac = average(oppACs).toNearest(0.01);
-
-        // Average AC weighted by the HP of each actor
-        let weightedAC = totalHP => (actor => findActorAC(actor) * findActorHP(actor) / totalHP);
-        this.calced.allies.weighted_ac = sum(this.allies.map(weightedAC(this.calced.allies.hp))).toNearest(0.01);
-        this.calced.opponents.weighted_ac = sum(this.opponents.map(weightedAC(this.calced.opponents.hp))).toNearest(0.01);
-
-        // Average DPR of attacks against the weighted AC of the opposing force
-        let findActorAttacks = actor => actor.items.filter(i => i.hasAttack && i.hasDamage);
-        let toHitAsNumber = toHit => Number(toHit.replace(' ', '')); // e.g. "+ 5" becomes 5
-        let hitProb = (toHit, AC) => 1 - ( (AC - toHitAsNumber(toHit) - 1) / 20 );
-        // Calculate average result of a damage roll formula
-        function avgDamage(damageRoll) {
-            // e.g. average value of "2d6+6" is (2*6 + 2)/2
-            let avgDamage = damageRoll.replace(/\b([0-9]+)d([0-9]+)\b/, '($1*$2 + $1)/2');
-            let r = new Roll(avgDamage);  // use Roll.evaluate() as a safe eval
-            return r.evaluate({async: false}).total;
-        }
-
-        /**
-         * TODO: make this a set of methods in different classes (5e, sw5e, ...)
-         */
-        function attackUsesResources(attack) {
-            let mode = attack.system?.scaling?.mode
-            // 5e uses "cantrip" here; sw5e uses "atwill"
-            return mode === 'atwill' || mode === 'cantrip';
-        }
-        /**
-         * TODO: make this a set of methods in different classes (5e, sw5e, ...)
-         */
-        function attackCasterLevel(attack) {
-            let ret = attack.curAdvancementCharLevel; // sw5e
-            if (ret === undefined) {
-                ret = attack.parent.system.details.level; // 5e
-            }
-            return ret;
-        }
-
-        /**
-         * Pulls the damage formula out of the attack
-         * and adjusts it for cantrip scaling when appropriate.
-         */
-        function getDamageFormula(attack) {
-            let damageFormula = attack.labels.damage;
-            if (attackUsesResources(attack)) {
-                let casterLevel = attackCasterLevel(attack);
-                const cantripTiers = [
-                    {pred: l => l >= 17, dice: 4},
-                    {pred: l => l >= 11, dice: 3},
-                    {pred: l => l >=  5, dice: 2},
-                    {pred: l =>    true, dice: 1}
-                ];
-                for (let tier of cantripTiers) {
-                    if (tier.pred(casterLevel)) {
-                        let ret = damageFormula.replace( /\b1d([0-9]+)\b/, `${tier.dice}d$1`);
-                        console.log('getDamageFormula(attack): damageFormula, casterLevel, ret',
-                            attack, damageFormula, casterLevel, ret
-                        );
-                        return ret;
-                    }
-                }
-            }
-            return damageFormula;
-        }
-        let attackDPR = (attack, targetAC) => {
-            let hp = hitProb(attack.labels.toHit, targetAC);
-            let damageFormula = getDamageFormula(attack);
-            let ad = avgDamage(damageFormula);
-            let result = hp * ad;
-            return result;
-        };
-        /**/
-
-        // set initial attack counts for new actors
-        function setAttackCounts(squad) {
-            let oppAC = squad.opp.weighted_ac;
-            squad.actors.forEach(actor => {
-                if (squad.attackCounts.has(actor.name)) {
-                    // if we've already done this, leave things as they are
-                    return;
-                }
-
-                let actorAttackCounts = new Map();
-                squad.attackCounts.set(actor.name, actorAttackCounts);
-
-                let attacks = findActorAttacks(actor);
-                if (attacks.length === 0) {
-                    // if the actor has no attacks, their entry in squad.attackCounts remains an empty map
-                    return;
-                }
-
-                // Check if the actor has a multiattack which matches a heuristic regex
-                // TODO: add heuristic regex matching for multiattacks
-
-                // otherwise we set the count to 1 for the highest DPR attack and to 0 for others
-                let highestDPRAttack = attacks.reduce(
-                    (a1, a2) => attackDPR(a1, oppAC) > attackDPR(a2, oppAC) ? a1 : a2
-                );
-                attacks.forEach(attack => actorAttackCounts.set(attack._id, {
-                    attack: attack,
-                    count: attack === highestDPRAttack? 1 : 0
-                }));
-            });
-        }
-        setAttackCounts(this.calced.allies);
-        setAttackCounts(this.calced.opponents);
-
-        function calcSquadDPR(squad) {
-            squad.dpr = sum(squad.actors.map(actor => {
-                // calculate total DPR of all each actor's attacks
-                let attackCounts = squad.attackCounts.get(actor.name);
-                if (attackCounts === undefined) {
-                    return 0;
-                }
-                return sum(Array.from(attackCounts.values(), attack =>
-                    attack.count * attackDPR(attack.attack, squad.opp.weighted_ac)
-                ));
-            })).toNearest(0.01);
-        }
-        calcSquadDPR(this.calced.allies);
-        calcSquadDPR(this.calced.opponents);
-
-        let calcRTV = squad => squad.rtv = (squad.opp.hp / squad.dpr).toNearest(0.01);
-        calcRTV(this.calced.allies);
-        calcRTV(this.calced.opponents);
-
-        if (this.selection) {
-            this.selection.hp = findActorHP(this.selection.actor);
-            this.selection.ac = findActorAC(this.selection.actor);
-            this.selection.attacks = findActorAttacks(this.selection.actor);
-            let squad = this.selection.squad === this.allies ? this.calced.allies : this.calced.opponents;
-            this.selection.attacks = this.selection.attacks.map(a => ({
-                _attack: a,
-                name: a.name,
-                dpr: attackDPR(a, squad.opp.weighted_ac).toNearest(0.01)
-            }));
-        }
-    }
-
-    /**
-     * Returns the best multiattack item in the inventory of the selected actor.
-     * For NPCs, this is their Multiattack feature.
-     * For PCs, this is Master of Combat, Greater Extra Attack, or Extra Attack,
-     * in descending order of preference.
-     */
-    get selectedActorMultiattack() {
-        if (this.selection) {
-            let npcMA = this.selection.actor.items.find(i => i.name === 'Multiattack');
-            if (npcMA) {
-                console.log('<<selectedActorMultiattack: npcMA', npcMA);
-                return npcMA;
-            }
-            for (let s of ['Master of Combat', 'Greater Extra Attack', 'Extra Attack']) {
-                let pcMA = this.selection.actor.items.find(i => i.name === s);
-                if (pcMA) {
-                    console.log('<<selectedActorMultiattack: pcMA', pcMA);
-                    return pcMA;
-                }
-            }
-        }
     }
 
     /**
@@ -462,18 +266,10 @@ export default class EncounterRTVApplication extends Application {
             const parentClass = event.srcElement.parentElement.parentElement.classList.value;
             const parentParentClass = event.srcElement.parentElement.parentElement.parentElement.classList.value;
             if ((parentClass === "group-field ally-field") || (parentParentClass === "group-field ally-field")) {
-                this.selection = {
-                    name: name,
-                    actor: this.allies.find(e => e.name === name),
-                    squad: this.allies
-                };
+                this.selection = new RTVSelection(name, this.calc.allies);
             }
             else if ((parentClass === "group-field opponent-field") || (parentParentClass === "group-field opponent-field")) {
-                this.selection = {
-                    name: name,
-                    actor: this.opponents.find(e => e.name === name),
-                    squad: this.opponents
-                };
+                this.selection = new RTVSelection(name, this.calc.opponents);
             }
             app.calc();
             app.render();
@@ -505,8 +301,7 @@ export default class EncounterRTVApplication extends Application {
     _onChangeAttackCount(event) {
         event.stopPropagation();
         console.log('_onChangeAttackCount(event)', event);
-        let calcedSquad = this.selection.squad === this.allies ? this.calced.allies : this.calced.opponents;
-        let actorAttackCounts = calcedSquad.attackCounts.get(this.selection.name);
+        let actorAttackCounts = this.selection.getActorAttackCounts(this.selection.actor);
         let attack = actorAttackCounts.get(event.srcElement.id);
         attack.count = event.srcElement.value;
 

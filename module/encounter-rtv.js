@@ -1,25 +1,8 @@
 const MODULE_ID = 'encounter-rtv';
 import EncounterRTVApplication from './rtv-form.js';
+import log from './log.js';
 
-console.log('================================yooooo===========================');
-
-Hooks.once('devModeReady', ({ registerPackageDebugFlag }) => {
-    registerPackageDebugFlag(MODULE_ID);
-});
-
-const devModeActive = () => game.modules.get('_dev-mode')?.api?.getPackageDebugValue(MODULE_ID);
-
-function log(...args) {
-    try {
-        // if(game.modules.get('_dev-mode')?.api?.getPackageDebugValue(MODULE_ID)) {
-        if (devModeActive()) {
-            console.log(MODULE_ID, '|', ...args);
-        }
-    } catch (e) {}
-}
-function logForce(...args) {
-    console.log(MODULE_ID, '|', ...args);
-}
+console.log('================================================\nglobalThis during module load:', Object.assign({}, globalThis));
 
 function getSceneControlButtons(buttons) {
     log('getSceneControlButtons; buttons:', buttons);

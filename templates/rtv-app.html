@@ -20,11 +20,21 @@
                 {{#with calced}}
                 <table>
                     <tr><th>Squad</th><th>Allies</th><th>Opponents</th></tr>
-                    <tr><td>Health Pool</td><td>{{allies.hp}}</td><td>{{opponents.hp}}</td></tr>
-                    <tr><td>Average AC</td><td>{{allies.avg_ac}}</td><td>{{opponents.avg_ac}}</td></tr>
-                    <tr><td>Weighted AC</td><td>{{allies.weighted_ac}}</td><td>{{opponents.weighted_ac}}</td></tr>
-                    <tr><td>DPR</td><td>{{allies.dpr}}</td><td>{{opponents.dpr}}</td></tr>
-                    <tr><td><strong>RTV</strong></td><td><strong>{{allies.rtv}}</strong></td><td><strong>{{opponents.rtv}}</strong></td></tr>
+                    <tr><td>Health Pool</td>
+                        <td>{{roundTo100ths allies.hp}}</td>
+                        <td>{{roundTo100ths opponents.hp}}</td></tr>
+                    <tr><td>Average AC</td>
+                        <td>{{roundTo100ths allies.avgAC}}</td>
+                        <td>{{roundTo100ths opponents.avgAC}}</td></tr>
+                    <tr><td>Weighted AC</td>
+                        <td>{{roundTo100ths allies.weightedAC}}</td>
+                        <td>{{roundTo100ths opponents.weightedAC}}</td></tr>
+                    <tr><td>DPR</td>
+                        <td>{{roundTo100ths allies.dpr}}</td>
+                        <td>{{roundTo100ths opponents.dpr}}</td></tr>
+                    <tr><td><strong>RTV</strong></td>
+                        <td><strong>{{roundTo100ths allies.rtv}}</strong></td>
+                        <td><strong>{{roundTo100ths opponents.rtv}}</strong></td></tr>
                 </table>
                 {{/with}}
             </div>
