@@ -1,5 +1,5 @@
 import log from './log.js';
-import CalcRTV from "./calc.js";
+import { default as CalcRTV, RTVSelection } from "./calc.js";
 
 let EB = {};
 EB.borderStyle = "2px solid rgb(120, 46, 34)";
@@ -58,9 +58,10 @@ export default class EncounterRTVApplication extends Application {
         Handlebars.registerHelper("attackCount", attack => {
             // we need the squad in `calced` rather than the one that _onClickPortrait gives us
             // TODO: refactor things to render this disgusting code unnecessary
-            let squad = rtv.selection.squad === rtv.allies ? rtv.calced.allies : rtv.calced.opponents;
+            //let squad = rtv.selection.squad === rtv.allies ? rtv.calced.allies : rtv.calced.opponents;
+            let squad = rtv.selection.squad;
             let actorName = rtv.selection.name
-            log('attackCount helper (attack)', attack);
+            log('attackCount helper; rtv, attack', rtv, attack);
             log('  squad, actorName', squad, actorName);
             return squad.attackCounts.get(actorName).get(attack._attack._id).count;
         });
@@ -262,14 +263,16 @@ export default class EncounterRTVApplication extends Application {
         if ((isPortrait) || (isHoverIcon)) {
             const app = game.users.apps.find(e => e.id === game.i18n.localize("EB.id"));
             let name = event.srcElement.title;
+            log('_onClickPortrait; this, event:', this, event);
 
             const parentClass = event.srcElement.parentElement.parentElement.classList.value;
             const parentParentClass = event.srcElement.parentElement.parentElement.parentElement.classList.value;
+            log('    parentClass, parentParentClass:', parentClass, parentParentClass);
             if ((parentClass === "group-field ally-field") || (parentParentClass === "group-field ally-field")) {
-                this.selection = new RTVSelection(name, this.calc.allies);
+                this.selection = new RTVSelection(name, this.calced.allies);
             }
             else if ((parentClass === "group-field opponent-field") || (parentParentClass === "group-field opponent-field")) {
-                this.selection = new RTVSelection(name, this.calc.opponents);
+                this.selection = new RTVSelection(name, this.calced.opponents);
             }
             app.calc();
             app.render();

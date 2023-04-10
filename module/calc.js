@@ -107,7 +107,7 @@ class SystemAccess5e {
             return npcMA;
         }
         for (let s of ['Master of Combat', 'Greater Extra Attack', 'Extra Attack']) {
-            let pcMA = this.selection.actor.items.find(i => i.name === s);
+            let pcMA = actor.items.find(i => i.name === s);
             if (pcMA) {
                 log('<<selectedActorMultiattack: pcMA', pcMA);
                 return pcMA;
@@ -142,7 +142,6 @@ class Squad {
 
     get hp() {
         log('squad.hp; this:', this);
-        log('sys', sys);
         return sum(this.actors.map(sys.getActorHP));
     }
     get avgAC() {
@@ -238,10 +237,11 @@ export class CalcRTV5e extends CalcRTV {
     }
 }
 
-class RTVSelection {
+export class RTVSelection {
     constructor(actorName, squad) {
+        log('RTVSelection constructor; this, actorName, squad:', this, actorName, squad);
         this.name = actorName;
-        this.actor = squad.actors.find(e => e.name === name);
+        this.actor = squad.actors.find(e => e.name === actorName);
         this.squad = squad;
     }
 
