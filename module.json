@@ -19,7 +19,7 @@
     "module/encounter-rtv.js"
   ],
   "styles": [
-    "./css/encounter-rtv.css"
+    "./styles/encounter-rtv.css"
   ],
   "languages": [
     {
