@@ -1,15 +1,18 @@
 {
   "id": "encounter-rtv",
   "title": "Encounter RTV",
-  "description": "Calculates Rounds To Victory for both sides of an encounter based on simulated actions.",
-  "version": "0.1.1",
+  "description": "Calculates Rounds To Victory for both sides of an encounter based on average damage per round.",
+  "version": "#{VERSION}#",
   "compatibility": {
     "minimum": "10",
     "verified": "10.291"
   },
+  "author": "Ted Tibbetts",
   "authors": [
     {
-      "name": "intuited"
+      "name": "Ted Tibbetts",
+      "discord": "circulated#6126",
+      "url": "https://github.com/intuited"
     }
   ],
   "esmodules": [
@@ -26,7 +29,8 @@
     }
   ],
   "url": "https://github.com/intuited/fvtt-encounter-rtv",
-  "manifest": "https://raw.githubusercontent.com/intuited/fvtt-encounter-rtv/master/encounter-rtv/module.json",
-  "download": "https://github.com/intuited/fvtt-encounter-rtv/archive/v0.0.1.zip",
-  "readme": "https://github.com/intuited/fvtt-encounter-rtv/blob/master/README.md"
+  "manifest": "#{MANIFEST}#",
+  "download": "#{DOWNLOAD}#",
+  "readme": "https://github.com/intuited/fvtt-encounter-rtv/blob/master/README.md",
+  "bugs": "https://github.com/intuited/fvtt-encounter-rtv/issues"
 }
