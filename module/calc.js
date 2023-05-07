@@ -23,10 +23,10 @@ function avgDamage(damageRoll) {
 let sys = null;
 Hooks.once('init', () => {
     log('init hook: system detection.  this:', this);
-    if (['dnd5e', 'sw5e'].includes(game.system.id)) {
+    if (game.system.id.match(/5e/) {
         sys = SystemAccess5e;
     } else {
-        ui.notifications.error('Encounter RTV only supports D&D 5e and sw5e at this time.');
+        ui.notifications.error('Encounter RTV only supports D&D 5e and similar systems at this time.');
     }
 });
 class SystemAccess5e {
@@ -37,12 +37,12 @@ class SystemAccess5e {
 
     static isCantrip(attack) {
         let mode = attack.system?.scaling?.mode
-        // 5e uses "cantrip" here; sw5e uses "atwill"
+        // 5e uses "cantrip" here; some other systems use "atwill"
         return mode === 'atwill' || mode === 'cantrip';
     }
 
     static attackCasterLevel(attack) {
-        let ret = attack.curAdvancementCharLevel; // sw5e
+        let ret = attack.curAdvancementCharLevel; // other system
         if (ret === undefined) {
             ret = attack.parent.system.details.level; // 5e
         }
@@ -260,5 +260,8 @@ export class RTVSelection {
     }
     get multiattack() {
         return sys.getActorMultiattack(this.actor);
+    }
+    get actorAttackCounts() {
+        return this.squad.getActorAttackCounts(this.actor)
     }
 }

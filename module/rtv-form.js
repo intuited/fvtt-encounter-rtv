@@ -288,8 +288,8 @@ export default class EncounterRTVApplication extends Application {
     _onClickRemove(event) {
         event.stopPropagation();
         let actorID = this.selection.actor.id
-        let actorIndex = this.selection.squad.findIndex(a => a.id === actorID);
-        this.selection.squad.splice(actorIndex, 1);
+        let actorIndex = this.selection.squad.actors.findIndex(a => a.id === actorID);
+        this.selection.squad.actors.splice(actorIndex, 1);
 
         this.calc();
         this.render();
@@ -304,7 +304,7 @@ export default class EncounterRTVApplication extends Application {
     _onChangeAttackCount(event) {
         event.stopPropagation();
         log('_onChangeAttackCount(event)', event);
-        let actorAttackCounts = this.selection.getActorAttackCounts(this.selection.actor);
+        let actorAttackCounts = this.selection.actorAttackCounts;
         let attack = actorAttackCounts.get(event.srcElement.id);
         attack.count = event.srcElement.value;
 
